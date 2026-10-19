@@ -1,0 +1,20 @@
+{
+  "name": "unonka",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Telegram Serverless bot: anonymous ASK, CHAT and MEET.",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check tgcloud/schema.js && node --check tgcloud/handlers/message.js && node --check tgcloud/handlers/callback_query.js && node --check tgcloud/lib/core.js && node --check tgcloud/lib/pure.js && node --check tgcloud/lib/ask.js && node --check tgcloud/lib/chat.js && node --check tgcloud/lib/meet.js",
+    "deploy": "tgcloud push",
+    "migrate": "tgcloud migrate --safe",
+    "status": "tgcloud status"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "^0.2.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

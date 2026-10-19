@@ -98,9 +98,10 @@ export async function anyBlock(a, b, scope) {
 
 export async function block(actorId, targetId, scope) {
   if (actorId === targetId) return;
-  await db.insert(blocks).values({
-    actorId, targetId, scope, createdAt: nowSeconds(),
-  }).onConflictDoNothing().run();
+  await db.run(
+    'INSERT OR IGNORE INTO unonka_blocks (actor_id, target_id, scope, created_at) VALUES (:actor, :target, :scope, :created)',
+    { ':actor': actorId, ':target': targetId, ':scope': scope, ':created': nowSeconds() },
+  );
 }
 
 export async function report(actorId, targetId, scope, reason = 'user_report') {

@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   parseStartParameter, validAge, validName, validCity, validBio, validMessage,
-  pairKey, compatible, callbackId, askLocator, normalizeText,
+  pairKey, compatible, callbackId, askLocator, normalizeText, messageRoute,
 } from '../tgcloud/lib/pure.js';
 
 describe('Anonymous links', () => {

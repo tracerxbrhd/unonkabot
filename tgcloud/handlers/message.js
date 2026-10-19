@@ -61,14 +61,11 @@ export default async function (message) {
   if (text.startsWith('/')) return say(chatId, 'Неизвестная команда. Используй /help или /menu.', keys.back);
 
   // Persistent state is the sole authority for routing. Never guess the recipient.
-  if (user.mode === 'ask' && (user.step === 'ask_compose' || user.step === 'ask_reply')) {
-    return acceptAskText(user, chatId, message.text);
-  }
-  if (user.mode === 'meet' && user.step.startsWith('meet_')) {
-    return meetInput(user, chatId, message);
-  }
-  if (user.mode === 'chat') return chatText(user, chatId, message.text);
-  if (user.mode === 'meet_chat' && user.contextId) return meetChatText(user, chatId, message.text);
+  const route = messageRoute(user);
+  if (route === 'ask') return acceptAskText(user, chatId, message.text);
+  if (route === 'meet_wizard') return meetInput(user, chatId, message);
+  if (route === 'chat') return chatText(user, chatId, message.text);
+  if (route === 'meet_chat') return meetChatText(user, chatId, message.text);
 
   return say(chatId, 'Выбери сервис из меню, чтобы начать.', keys.home);
 }

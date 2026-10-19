@@ -62,6 +62,15 @@ export function compatible(me, other) {
     (other.seeking === 'any' || other.seeking === me.gender);
 }
 
+// Exactly one recipient context may own a text message.
+export function messageRoute(user) {
+  if (user?.mode === 'ask' && ['ask_compose', 'ask_reply'].includes(user.step) && user.contextId) return 'ask';
+  if (user?.mode === 'meet' && typeof user.step === 'string' && user.step.startsWith('meet_')) return 'meet_wizard';
+  if (user?.mode === 'chat') return 'chat';
+  if (user?.mode === 'meet_chat' && user.contextId) return 'meet_chat';
+  return 'none';
+}
+
 export function callbackId(data, prefix) {
   if (typeof data !== 'string' || !data.startsWith(prefix)) return null;
   const id = data.slice(prefix.length);

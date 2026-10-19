@@ -106,9 +106,10 @@ export async function block(actorId, targetId, scope) {
 
 export async function report(actorId, targetId, scope, reason = 'user_report') {
   if (actorId === targetId) return;
-  await db.insert(reports).values({
-    reporterId: actorId, targetId, scope, reason, createdAt: nowSeconds(),
-  }).run();
+  await db.run(
+    'INSERT OR IGNORE INTO unonka_reports (reporter_id, target_id, scope, reason, created_at) VALUES (:actor, :target, :scope, :reason, :time)',
+    { ':actor': actorId, ':target': targetId, ':scope': scope, ':reason': reason, ':time': nowSeconds() },
+  );
   await block(actorId, targetId, scope);
 }
 

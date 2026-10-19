@@ -1,5 +1,5 @@
 import { ensureUser, home, say, privacy, deletionKeyboard, keys, requireAdult } from '../lib/core.js';
-import { parseStartParameter } from '../lib/pure.js';
+import { parseStartParameter, messageRoute } from '../lib/pure.js';
 import { openAsk, openAskLink, acceptAskText } from '../lib/ask.js';
 import { findChat, chatText, stopChat } from '../lib/chat.js';
 import { openMeet, meetInput, meetChatText } from '../lib/meet.js';

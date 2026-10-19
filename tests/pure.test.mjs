@@ -46,6 +46,18 @@ describe('Meet profile validation', () => {
   });
 });
 
+describe('Routing isolation', () => {
+  it('never forwards a message outside its explicit current mode', () => {
+    assert.equal(messageRoute({ mode: 'ask', step: 'ask_reply', contextId: 12 }), 'ask');
+    assert.equal(messageRoute({ mode: 'ask', step: '', contextId: 12 }), 'none');
+    assert.equal(messageRoute({ mode: 'home', step: 'ask_reply', contextId: 12 }), 'none');
+    assert.equal(messageRoute({ mode: 'chat', step: '', contextId: 0 }), 'chat');
+    assert.equal(messageRoute({ mode: 'meet', step: 'meet_bio', contextId: 0 }), 'meet_wizard');
+    assert.equal(messageRoute({ mode: 'meet_chat', step: '', contextId: 45 }), 'meet_chat');
+    assert.equal(messageRoute({ mode: 'meet_chat', step: '', contextId: 0 }), 'none');
+  });
+});
+
 describe('Messaging boundaries', () => {
   it('rejects oversized text and strips NULL byte', () => {
     assert.equal(validMessage(''), null);

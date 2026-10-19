@@ -183,10 +183,11 @@ async function vote(userId, chatId, targetId, choice) {
     return say(chatId, 'Анкета недоступна.', menu);
   }
   // One irreversible decision per profile per v0.1; old inline keyboards are idempotent.
-  const added = await db.insert(meetVotes).values({
-    voterId: userId, targetId, choice, createdAt: nowSeconds(),
-  }).onConflictDoNothing().returning().run();
-  if (!added.length) return say(chatId, 'Эта анкета уже оценена.', menu);
+  const added = await db.run(
+    'INSERT OR IGNORE INTO unonka_meet_votes (voter_id, target_id, choice, created_at) VALUES (:voter, :target, :choice, :now) RETURNING id',
+    { ':voter': userId, ':target': targetId, ':choice': choice, ':now': nowSeconds() },
+  );
+  if (!added.rows?.length) return say(chatId, 'Эта анкета уже оценена.', menu);
 
   if (choice === 'like') {
     const reverse = await db.select().from(meetVotes).where(and(
@@ -194,11 +195,11 @@ async function vote(userId, chatId, targetId, choice) {
     )).get();
     if (reverse) {
       const pair = pairKey(userId, targetId);
-      const fresh = await db.insert(meetPairs).values({
-        pairKey: pair, aId: Math.min(userId, targetId), bId: Math.max(userId, targetId),
-        active: true, createdAt: nowSeconds(),
-      }).onConflictDoNothing().returning().run();
-      if (fresh.length) {
+      const fresh = await db.run(
+        'INSERT OR IGNORE INTO unonka_meet_pairs (pair_key, a_id, b_id, active, created_at) VALUES (:key, :a, :b, 1, :now) RETURNING pair_key',
+        { ':key': pair, ':a': Math.min(userId, targetId), ':b': Math.max(userId, targetId), ':now': nowSeconds() },
+      );
+      if (fresh.rows?.length) {
         try { await say(userId, '💞 Взаимная симпатия с ' + target.name + '! Открой диалог в «Мои симпатии».',
           { inline_keyboard: [[{ text: '💬 Написать', callback_data: 'meet:open:' + targetId }]] }); }
         catch (_) { /* Notification best effort. */ }

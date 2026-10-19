@@ -101,4 +101,5 @@ export const reports = table('unonka_reports', {
   createdAt: integer('created_at').notNull(),
 }, (t) => ({
   targetIdx: index('reports_target_idx').on(t.targetId),
+  dedupe: uniqueIndex('reports_actor_target_scope_uq').on(t.reporterId, t.targetId, t.scope),
 }));

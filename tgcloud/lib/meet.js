@@ -155,6 +155,7 @@ export async function nextCandidate(userId, chatId) {
     for (const candidate of batch) {
       if (skipped.has(candidate.userId) || blockedIds.has(candidate.userId) || !compatible(me, candidate)) continue;
       if (await anyBlock(userId, candidate.userId, 'meet')) continue;
+      await setContext(userId, 'meet', 'meet_browse', candidate.userId);
       const text = '💕 ' + candidate.name + ', ' + candidate.age + '\n📍 ' + candidate.city +
         '\n\n' + candidate.bio;
       const action = { inline_keyboard: [
@@ -171,10 +172,15 @@ export async function nextCandidate(userId, chatId) {
     }
     cursor = batch[batch.length - 1].userId;
   }
+  await setContext(userId, 'meet');
   return say(chatId, '💤 На данный момент подходящие анкеты закончились. Загляни позже.', menu);
 }
 
 async function vote(userId, chatId, targetId, choice) {
+  const actor = await getUser(userId);
+  if (actor?.mode !== 'meet' || actor.step !== 'meet_browse' || actor.contextId !== targetId) {
+    return say(chatId, 'Эта карточка уже не активна. Открой поиск заново.', menu);
+  }
   if (!targetId || userId === targetId) return say(chatId, 'Эта анкета недоступна.', menu);
   const me = await getProfile(userId);
   const target = await getProfile(targetId);
@@ -301,7 +307,8 @@ export async function handleMeetCallback(userId, chatId, data, message) {
   const skippedId = callbackId(data, 'meet:skip:');
   if (skippedId) return vote(userId, chatId, skippedId, 'skip');
   const reportId = callbackId(data, 'meet:report:');
-  if (reportId && reportId !== userId) {
+  if (reportId && reportId !== userId && user.mode === 'meet' &&
+      user.step === 'meet_browse' && user.contextId === reportId) {
     await report(userId, reportId, 'meet');
     await say(chatId, '🚩 Жалоба сохранена. Анкета заблокирована.');
     return nextCandidate(userId, chatId);
